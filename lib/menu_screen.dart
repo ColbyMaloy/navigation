@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:navigation/zoom_scaffold.dart';
 
 class MenuScreen extends StatefulWidget {
   @override
@@ -28,26 +29,34 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 
-  createMenuItems() {
+  createMenuItems(MenuController controller) {
     return Transform(
       transform: Matrix4.translationValues(0.0, 225, 0.0),
       child: Column(
         children: <Widget>[
           MenuListItem(
             isSelected: true,
-            title: "THE PADDOCK",
+            title: "THE PADDOCK",onTap: (){
+              controller.close();
+            },
           ),
           MenuListItem(
             isSelected: false,
-            title: "THE HERO",
+            title: "THE HERO",onTap: (){
+              controller.close();
+            },
           ),
           MenuListItem(
             isSelected: false,
-            title: "HELP US GROW",
+            title: "HELP US GROW",onTap: (){
+              controller.close();
+            },
           ),
           MenuListItem(
             isSelected: false,
-            title: "The PADDOCK",
+            title: "THE PADDOCK",onTap: (){
+              controller.close();
+            },
           ),
         ],
       ),
@@ -56,38 +65,44 @@ class _MenuScreenState extends State<MenuScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: NetworkImage(
-            "https://images.unsplash.com/photo-1530482817083-29ae4b92ff15?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60",
+    return ZoomMenuController(builder: (BuildContext context, menuController) {
+      Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage(
+              "https://images.unsplash.com/photo-1530482817083-29ae4b92ff15?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60",
+            ),
+            fit: BoxFit.cover,
           ),
-          fit: BoxFit.cover,
         ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: Stack(
-          children: <Widget>[createMenuTitle(), createMenuItems()],
+        child: Material(
+          color: Colors.transparent,
+          child: Stack(
+            children: <Widget>[
+              createMenuTitle(),
+              createMenuItems(menuController),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
 class MenuListItem extends StatelessWidget {
   final bool isSelected;
   final String title;
+  final Function() onTap;
 
-  MenuListItem({this.isSelected, this.title});
+  MenuListItem({this.isSelected, this.title,this.onTap,});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       splashColor: Color(0x44000000),
-      onTap: isSelected ? null : () {},
+      onTap: isSelected ? null : onTap,
       child: Container(
         width: double.infinity,
         child: Padding(

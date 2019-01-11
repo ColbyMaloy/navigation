@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:navigation/menu_screen.dart';
 import 'package:navigation/other_screen.dart';
 import 'package:navigation/restaurant_screen.dart';
+import 'package:navigation/zoom_scaffold.dart';
 
 void main() => runApp(MyApp());
 
@@ -26,40 +27,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var activeScreen = restaurantScreen;
-  
-
-  createContentDisplay() {
-    return Container(
-      decoration: BoxDecoration(
-        image: activeScreen.background,
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {},
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0.0,
-          title: Text(
-            activeScreen.title,
-            style: TextStyle(fontSize: 25, fontFamily: "Anton"),
-          ),
-          centerTitle: true,
-        ),
-        body: activeScreen.contentBuilder(context),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        MenuScreen()
-        //createContentDisplay(),
-      ],
+    return ZoomScaffold(
+      menuScreen: MenuScreen(),
+      contentScreen: activeScreen,
     );
   }
 }
