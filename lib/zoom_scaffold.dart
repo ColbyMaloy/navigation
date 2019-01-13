@@ -10,13 +10,20 @@ class ZoomScaffold extends StatefulWidget {
   _ZoomScaffoldState createState() => _ZoomScaffoldState();
 }
 
-class _ZoomScaffoldState extends State<ZoomScaffold> {
+class _ZoomScaffoldState extends State<ZoomScaffold>
+    with TickerProviderStateMixin {
   MenuController menuController;
+
+  Curve scaleDownCurve = Interval(0.0, 0.25, curve: Curves.easeOut);
+  Curve scaleUpCurve = Interval(0.0, 1.0, curve: Curves.easeOut);
+  Curve slideOutCurve = Interval(0.0, 1.0, curve: Curves.easeOut);
+  Curve slideInCurve = Interval(0.0, 1.0, curve: Curves.easeOut);
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    menuController = MenuController()
+    menuController = MenuController(vsync: this)
       ..addListener(() {
         setState(() {});
       });
@@ -67,9 +74,30 @@ class _ZoomScaffoldState extends State<ZoomScaffold> {
   }
 
   zoomAndSlide(Widget content) {
-    final slideAmount = 275 * menuController.percentOpen;
+    var slidePercent, scalePercent;
 
-    final contentScale = 1 - (.2 * menuController.percentOpen);
+    switch (menuController.state) {
+      case MenuState.closed:
+        slidePercent = 0.0;
+        scalePercent = 0.0;
+        break;
+      case MenuState.closing:
+        slidePercent = slideInCurve.transform(menuController.percentOpen);
+        scalePercent = scaleUpCurve.transform(menuController.percentOpen);
+        break;
+      case MenuState.open:
+        slidePercent = 1.0;
+        scalePercent = 1.0;
+        break;
+      case MenuState.opening:
+        slidePercent = slideOutCurve.transform(menuController.percentOpen);
+        scalePercent = scaleDownCurve.transform(menuController.percentOpen);
+        break;
+    }
+
+    final slideAmount = 275 * slidePercent;
+
+    final contentScale = 1 - (.2 * scalePercent);
 
     final cornerRadius = 10 * menuController.percentOpen;
 
@@ -131,19 +159,55 @@ class Screen {
 }
 
 class MenuController extends ChangeNotifier {
+  final TickerProvider vsync;
+  final AnimationController controller;
   MenuState state = MenuState.closed;
-  double percentOpen = 0.0;
+
+  MenuController({
+    this.vsync,
+  }) : controller = AnimationController(
+          vsync: vsync,
+        ) {
+    controller
+      ..duration = const Duration(milliseconds: 1000)
+      ..addListener(() {
+        notifyListeners();
+      })
+      ..addStatusListener((status) {
+        switch (status) {
+          case AnimationStatus.completed:
+            state = MenuState.open;
+            break;
+          case AnimationStatus.dismissed:
+            state = MenuState.closed;
+            break;
+          case AnimationStatus.forward:
+            state = MenuState.opening;
+            break;
+          case AnimationStatus.reverse:
+            state = MenuState.closing;
+            break;
+        }
+        notifyListeners();
+      });
+  }
+
+  @override
+  dispose() {
+    super.dispose();
+    controller.dispose();
+  }
+
+  get percentOpen {
+    return controller.value;
+  }
 
   open() {
-    state = MenuState.open;
-    percentOpen = 1.0;
-    notifyListeners();
+    controller.forward();
   }
 
   close() {
-    state = MenuState.closed;
-    percentOpen = 0.0;
-    notifyListeners();
+    controller.reverse();
   }
 
   toggle() {

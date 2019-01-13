@@ -65,8 +65,8 @@ class _MenuScreenState extends State<MenuScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ZoomMenuController(builder: (BuildContext context, menuController) {
-      Container(
+    return ZoomMenuController(builder: (BuildContext context, MenuController menuController) {
+      return Container(
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
